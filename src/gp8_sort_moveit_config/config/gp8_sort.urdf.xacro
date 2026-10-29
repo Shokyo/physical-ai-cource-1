@@ -1,0 +1,5 @@
+<?xml version="1.0"?>
+<!-- thin wrapper so MoveItConfigsBuilder finds the robot description in this package -->
+<robot xmlns:xacro="http://ros.org/wiki/xacro" name="gp8_sort">
+  <xacro:include filename="$(find gp8_sort_description)/urdf/gp8_sort.urdf.xacro"/>
+</robot>

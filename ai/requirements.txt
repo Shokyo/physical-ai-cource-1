@@ -1,0 +1,10 @@
+# Python environment for the YOLO-World detector node.
+# torch: pick the CUDA build that matches your driver, e.g.
+#   uv pip install torch torchvision --index-url https://download.pytorch.org/whl/cu128
+--extra-index-url https://download.pytorch.org/whl/cu128
+torch==2.11.0
+torchvision
+ultralytics>=8.3
+opencv-python-headless
+numpy
+pyyaml

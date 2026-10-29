@@ -1,0 +1,124 @@
+<?xml version="1.0"?>
+<!--
+  GP8 + simulated vacuum gripper for the sorting task.
+
+  args:
+    sim              gazebo | mock   (hardware backend for ros2_control)
+    controllers_file controller_manager yaml (gazebo mode only)
+    pick_objects     space-separated Gazebo model names that the vacuum
+                     gripper may attach to (one DetachableJoint plugin each)
+-->
+<robot xmlns:xacro="http://ros.org/wiki/xacro" name="gp8_sort">
+
+  <xacro:arg name="sim" default="gazebo"/>
+  <xacro:arg name="controllers_file" default="$(find gp8_sort_description)/config/ros2_controllers.yaml"/>
+  <xacro:arg name="pick_objects" default="red_cube green_cube blue_cylinder"/>
+
+  <xacro:include filename="$(find gp8_sort_description)/urdf/gp8_sim_macro.xacro"/>
+  <xacro:motoman_gp8_sim prefix=""/>
+
+  <!-- fix the robot to the world -->
+  <link name="world"/>
+  <joint name="world-base_link" type="fixed">
+    <parent link="world"/>
+    <child link="base_link"/>
+    <origin xyz="0 0 0" rpy="0 0 0"/>
+  </joint>
+
+  <!-- ===== simulated vacuum gripper =====
+       tool0 z points out of the flange. The suction cup is a 10 cm cylinder,
+       'tcp' is the tip of the cup (used as MoveIt end-effector link). -->
+  <link name="suction_cup">
+    <visual>
+      <origin xyz="0 0 0.045" rpy="0 0 0"/>
+      <geometry><cylinder radius="0.012" length="0.09"/></geometry>
+      <material name="suction_grey"><color rgba="0.25 0.25 0.25 1"/></material>
+    </visual>
+    <visual>
+      <origin xyz="0 0 0.095" rpy="0 0 0"/>
+      <geometry><cylinder radius="0.022" length="0.01"/></geometry>
+      <material name="suction_black"><color rgba="0.05 0.05 0.05 1"/></material>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0.045" rpy="0 0 0"/>
+      <geometry><cylinder radius="0.012" length="0.09"/></geometry>
+    </collision>
+    <xacro:box_inertial mass="0.1" x="0.03" y="0.03" z="0.1" ox="0" oy="0" oz="0.05"/>
+  </link>
+  <joint name="tool0-suction_cup" type="fixed">
+    <parent link="tool0"/>
+    <child link="suction_cup"/>
+    <origin xyz="0 0 0" rpy="0 0 0"/>
+  </joint>
+  <link name="tcp"/>
+  <joint name="suction_cup-tcp" type="fixed">
+    <parent link="suction_cup"/>
+    <child link="tcp"/>
+    <origin xyz="0 0 0.10" rpy="0 0 0"/>
+  </joint>
+
+  <!-- ===== ros2_control ===== -->
+  <ros2_control name="gp8_system" type="system">
+    <hardware>
+      <xacro:if value="${'$(arg sim)' == 'gazebo'}">
+        <plugin>gz_ros2_control/GazeboSimSystem</plugin>
+      </xacro:if>
+      <xacro:if value="${'$(arg sim)' == 'mock'}">
+        <plugin>mock_components/GenericSystem</plugin>
+        <param name="calculate_dynamics">true</param>
+      </xacro:if>
+    </hardware>
+    <xacro:macro name="ctrl_joint" params="name init:=0.0">
+      <joint name="${name}">
+        <command_interface name="position"/>
+        <state_interface name="position">
+          <param name="initial_value">${init}</param>
+        </state_interface>
+        <state_interface name="velocity"/>
+      </joint>
+    </xacro:macro>
+    <xacro:ctrl_joint name="joint_1"/>
+    <xacro:ctrl_joint name="joint_2"/>
+    <xacro:ctrl_joint name="joint_3"/>
+    <xacro:ctrl_joint name="joint_4"/>
+    <xacro:ctrl_joint name="joint_5"/>
+    <xacro:ctrl_joint name="joint_6"/>
+  </ros2_control>
+
+  <xacro:if value="${'$(arg sim)' == 'gazebo'}">
+    <gazebo>
+      <plugin filename="gz_ros2_control-system" name="gz_ros2_control::GazeboSimROS2ControlPlugin">
+        <parameters>$(arg controllers_file)</parameters>
+        <position_proportional_gain>0.5</position_proportional_gain>
+      </plugin>
+    </gazebo>
+
+    <!-- one DetachableJoint per pickable object. Attach/detach by publishing
+         an empty message on /gp8/attach/<model> or /gp8/detach/<model>. -->
+    <xacro:macro name="vacuum_targets" params="names">
+      <xacro:if value="${names != ''}">
+        <xacro:property name="first" value="${names.split()[0]}"/>
+        <xacro:property name="rest" value="${' '.join(names.split()[1:])}"/>
+        <gazebo>
+          <plugin filename="gz-sim-detachable-joint-system" name="gz::sim::systems::DetachableJoint">
+            <parent_link>link_6</parent_link>
+            <child_model>${first}</child_model>
+            <child_link>link</child_link>
+            <initial_attach>false</initial_attach>
+            <attach_topic>/gp8/attach/${first}</attach_topic>
+            <detach_topic>/gp8/detach/${first}</detach_topic>
+            <output_topic>/gp8/attached/${first}</output_topic>
+            <suppress_child_warning>true</suppress_child_warning>
+          </plugin>
+        </gazebo>
+        <xacro:vacuum_targets names="${rest}"/>
+      </xacro:if>
+    </xacro:macro>
+    <xacro:vacuum_targets names="$(arg pick_objects)"/>
+
+    <gazebo reference="suction_cup">
+      <material><ambient>0.2 0.2 0.2 1</ambient><diffuse>0.2 0.2 0.2 1</diffuse></material>
+    </gazebo>
+  </xacro:if>
+
+</robot>

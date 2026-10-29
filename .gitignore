@@ -1,0 +1,12 @@
+build/
+install/
+log/
+ai/.venv/
+ai/models/*.pt
+ai/models/weights/
+__pycache__/
+*.pyc
+media/*.mp4
+ai/dataset/
+ai/runs/
+media/rec/

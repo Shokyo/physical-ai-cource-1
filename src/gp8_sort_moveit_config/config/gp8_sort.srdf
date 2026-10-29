@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<robot name="gp8_sort">
+  <!-- planning group: the 6-axis arm, tip = suction cup tip -->
+  <group name="arm">
+    <chain base_link="base_link" tip_link="tcp"/>
+  </group>
+
+  <group_state name="home" group="arm">
+    <joint name="joint_1" value="0"/>
+    <joint name="joint_2" value="0"/>
+    <joint name="joint_3" value="0"/>
+    <joint name="joint_4" value="0"/>
+    <joint name="joint_5" value="0"/>
+    <joint name="joint_6" value="0"/>
+  </group_state>
+  <!-- tool pointing down above the table -->
+  <group_state name="ready" group="arm">
+    <joint name="joint_1" value="0"/>
+    <joint name="joint_2" value="0.35"/>
+    <joint name="joint_3" value="0.0"/>
+    <joint name="joint_4" value="0"/>
+    <joint name="joint_5" value="-1.22"/>
+    <joint name="joint_6" value="0"/>
+  </group_state>
+
+  <end_effector name="suction" parent_link="tcp" group="arm"/>
+
+  <!-- collision pairs that never need checking -->
+  <disable_collisions link1="base_link" link2="link_1" reason="Adjacent"/>
+  <disable_collisions link1="base_link" link2="link_2" reason="Never"/>
+  <disable_collisions link1="link_1" link2="link_2" reason="Adjacent"/>
+  <disable_collisions link1="link_1" link2="link_3" reason="Never"/>
+  <disable_collisions link1="link_2" link2="link_3" reason="Adjacent"/>
+  <disable_collisions link1="link_2" link2="link_4" reason="Never"/>
+  <disable_collisions link1="link_3" link2="link_4" reason="Adjacent"/>
+  <disable_collisions link1="link_3" link2="link_5" reason="Never"/>
+  <disable_collisions link1="link_3" link2="link_6" reason="Never"/>
+  <disable_collisions link1="link_4" link2="link_5" reason="Adjacent"/>
+  <disable_collisions link1="link_4" link2="link_6" reason="Never"/>
+  <disable_collisions link1="link_4" link2="suction_cup" reason="Never"/>
+  <disable_collisions link1="link_5" link2="link_6" reason="Adjacent"/>
+  <disable_collisions link1="link_5" link2="suction_cup" reason="Never"/>
+  <disable_collisions link1="link_6" link2="suction_cup" reason="Adjacent"/>
+</robot>

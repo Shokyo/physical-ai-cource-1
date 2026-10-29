@@ -1,0 +1,72 @@
+# Task definition shared by the detector, the dataset generator and the
+# pick-and-place node.
+camera:
+  # pose of the overhead camera in the world frame (must match the world SDF)
+  position: [0.5, 0.0, 1.4]
+  # camera looks straight down, image "up" = world +x, image "right" = world -y
+  image_topic: /camera/image
+  info_topic: /camera/camera_info
+
+table_top_z: 0.15
+
+# One entry per object class. `label` is the class name (also the text prompt
+# when a YOLO-World model is used), `model` the Gazebo model name (used for the
+# vacuum attach topic and set_pose), `shape`/`size`/`radius`/`height` the
+# geometry (for auto-labelling), `tray` the place position (x, y) and
+# `tray_top_z` the tray surface height. `initial_pose` = [x, y, z, yaw] as in the
+# world file (restored after dataset generation).
+objects:
+  - label: red cube
+    model: red_cube
+    color: [0.9, 0.05, 0.05]
+    shape: box
+    size: [0.05, 0.05, 0.05]
+    height: 0.05
+    initial_pose: [0.45, 0.15, 0.176, 0.3]
+    tray: [0.30, 0.50]
+    tray_top_z: 0.10
+  - label: green cube
+    model: green_cube
+    color: [0.05, 0.7, 0.1]
+    shape: box
+    size: [0.05, 0.05, 0.05]
+    height: 0.05
+    initial_pose: [0.60, -0.12, 0.176, -0.4]
+    tray: [0.30, -0.50]
+    tray_top_z: 0.10
+  - label: blue cylinder
+    model: blue_cylinder
+    color: [0.05, 0.1, 0.9]
+    shape: cylinder
+    radius: 0.025
+    height: 0.06
+    initial_pose: [0.55, 0.04, 0.181, 0.0]
+    tray: [0.05, 0.50]
+    tray_top_z: 0.10
+
+# random placement zone for dataset generation (and for re-randomising the
+# scene before a demo)
+dataset:
+  x_range: [0.36, 0.60]
+  y_range: [-0.26, 0.26]
+  min_dist: 0.10
+  presence_prob: 0.85
+
+detector:
+  # fine-tuned YOLO (trained on the auto-labelled Gazebo dataset).
+  # Use yolov8s-worldv2.pt for zero-shot YOLO-World instead (lower accuracy on
+  # these simple shapes). Relative paths are resolved against `weights_dir`.
+  weights: gp8_sort_yolo.pt
+  conf: 0.5
+  rate_hz: 4.0
+  imgsz: 800
+
+motion:
+  approach_height: 0.10   # pre-grasp height above the object top
+  lift_height: 0.15       # height to lift after attaching
+  velocity_scaling: 0.4
+  acceleration_scaling: 0.4
+  # joint-space waypoints
+  home: [0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+  # observation pose: arm swung away so it does not occlude the camera
+  ready: [-2.0, 0.0, 0.0, 0.0, 0.0, 0.0]

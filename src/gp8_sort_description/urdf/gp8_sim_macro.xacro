@@ -1,0 +1,204 @@
+<?xml version="1.0" ?>
+<!--
+  Yaskawa Motoman GP8 macro for simulation.
+
+  Based on motoman_gp8_support/urdf/gp8_macro.xacro from
+  https://github.com/Yaskawa-Global/motoman_ros2_support_packages (BSD-3-Clause).
+  Modifications for this project:
+    * added <inertial> blocks to every link (required by Gazebo). Masses are
+      rough estimates (GP8 total mass is about 32 kg), inertia tensors are
+      computed from the collision-mesh bounding boxes.
+-->
+<robot xmlns:xacro="http://ros.org/wiki/xacro">
+
+  <!-- box-approximated inertia: mass, bounding-box size (x y z), bbox center (ox oy oz) -->
+  <xacro:macro name="box_inertial" params="mass x y z ox oy oz">
+    <inertial>
+      <origin xyz="${ox} ${oy} ${oz}" rpy="0 0 0"/>
+      <mass value="${mass}"/>
+      <inertia ixx="${mass/12.0*(y*y+z*z)}" iyy="${mass/12.0*(x*x+z*z)}" izz="${mass/12.0*(x*x+y*y)}"
+               ixy="0" ixz="0" iyz="0"/>
+    </inertial>
+  </xacro:macro>
+
+  <xacro:macro name="motoman_gp8_sim" params="prefix">
+    <xacro:include filename="$(find motoman_resources)/urdf/common_materials.xacro"/>
+
+    <!-- link list -->
+    <link name="${prefix}base_link">
+      <visual>
+        <geometry>
+          <mesh filename="package://motoman_gp8_support/meshes/visual/base_link.stl"/>
+        </geometry>
+        <xacro:material_yaskawa_blue/>
+      </visual>
+      <collision>
+        <geometry>
+          <mesh filename="package://motoman_gp8_support/meshes/collision/base_link.stl"/>
+        </geometry>
+      </collision>
+      <xacro:box_inertial mass="12.0" x="0.237" y="0.200" z="0.199" ox="-0.019" oy="0.0" oz="0.099"/>
+    </link>
+    <link name="${prefix}link_1">
+      <visual>
+        <geometry>
+          <mesh filename="package://motoman_gp8_support/meshes/visual/link_1.stl"/>
+        </geometry>
+        <xacro:material_yaskawa_blue/>
+      </visual>
+      <collision>
+        <geometry>
+          <mesh filename="package://motoman_gp8_support/meshes/collision/link_1.stl"/>
+        </geometry>
+      </collision>
+      <xacro:box_inertial mass="8.0" x="0.198" y="0.166" z="0.201" ox="0.002" oy="0.0" oz="-0.040"/>
+    </link>
+    <link name="${prefix}link_2">
+      <visual>
+        <geometry>
+          <mesh filename="package://motoman_gp8_support/meshes/visual/link_2.stl"/>
+        </geometry>
+        <xacro:material_yaskawa_blue/>
+      </visual>
+      <collision>
+        <geometry>
+          <mesh filename="package://motoman_gp8_support/meshes/collision/link_2.stl"/>
+        </geometry>
+      </collision>
+      <xacro:box_inertial mass="6.0" x="0.156" y="0.230" z="0.462" ox="-0.014" oy="0.0" oz="0.167"/>
+    </link>
+    <link name="${prefix}link_3">
+      <visual>
+        <geometry>
+          <mesh filename="package://motoman_gp8_support/meshes/visual/link_3.stl"/>
+        </geometry>
+        <xacro:material_yaskawa_blue/>
+      </visual>
+      <collision>
+        <geometry>
+          <mesh filename="package://motoman_gp8_support/meshes/collision/link_3.stl"/>
+        </geometry>
+      </collision>
+      <xacro:box_inertial mass="3.5" x="0.175" y="0.144" z="0.158" ox="-0.017" oy="-0.001" oz="0.024"/>
+    </link>
+    <link name="${prefix}link_4">
+      <visual>
+        <geometry>
+          <mesh filename="package://motoman_gp8_support/meshes/visual/link_4.stl"/>
+        </geometry>
+        <xacro:material_yaskawa_blue/>
+      </visual>
+      <collision>
+        <geometry>
+          <mesh filename="package://motoman_gp8_support/meshes/collision/link_4.stl"/>
+        </geometry>
+      </collision>
+      <xacro:box_inertial mass="2.0" x="0.304" y="0.110" z="0.104" ox="-0.116" oy="0.0" oz="0.001"/>
+    </link>
+    <link name="${prefix}link_5">
+      <visual>
+        <geometry>
+          <mesh filename="package://motoman_gp8_support/meshes/visual/link_5.stl"/>
+        </geometry>
+        <xacro:material_yaskawa_blue/>
+      </visual>
+      <collision>
+        <geometry>
+          <mesh filename="package://motoman_gp8_support/meshes/collision/link_5.stl"/>
+        </geometry>
+      </collision>
+      <xacro:box_inertial mass="0.8" x="0.114" y="0.066" z="0.078" ox="0.019" oy="0.0" oz="0.0"/>
+    </link>
+    <link name="${prefix}link_6">
+      <visual>
+        <geometry>
+          <mesh filename="package://motoman_gp8_support/meshes/visual/link_6.stl"/>
+        </geometry>
+        <xacro:material_yaskawa_blue/>
+      </visual>
+      <collision>
+        <geometry>
+          <mesh filename="package://motoman_gp8_support/meshes/collision/link_6.stl"/>
+        </geometry>
+      </collision>
+      <xacro:box_inertial mass="0.3" x="0.013" y="0.060" z="0.060" ox="0.074" oy="0.0" oz="0.0"/>
+    </link>
+    <!-- end of link list -->
+
+    <!-- joint list -->
+    <joint name="${prefix}joint_1" type="revolute">
+      <parent link="${prefix}base_link"/>
+      <child link="${prefix}link_1"/>
+      <origin xyz="0 0 0.330" rpy="0 0 0" />
+      <axis xyz="0 0 1" />
+      <limit lower="${radians(-170)}" upper="${radians(170)}" effort="150.92" velocity="${radians(455)}"/>
+      <dynamics damping="1.0" friction="0.5"/>
+    </joint>
+    <joint name="${prefix}joint_2" type="revolute">
+      <parent link="${prefix}link_1"/>
+      <child link="${prefix}link_2"/>
+      <origin xyz="0.040 0 0" rpy="0 0 0" />
+      <axis xyz="0 1 0" />
+      <limit lower="${radians(-65)}" upper="${radians(145)}" effort="176.4" velocity="${radians(385)}"/>
+      <dynamics damping="1.0" friction="0.5"/>
+    </joint>
+    <joint name="${prefix}joint_3" type="revolute">
+      <parent link="${prefix}link_2"/>
+      <child link="${prefix}link_3"/>
+      <origin xyz="0 0 0.345" rpy="0 0 0" />
+      <axis xyz="0 -1 0" />
+      <limit lower="${radians(-70)}" upper="${radians(190)}" effort="107.56" velocity="${radians(520)}"/>
+      <dynamics damping="1.0" friction="0.5"/>
+    </joint>
+    <joint name="${prefix}joint_4" type="revolute">
+      <parent link="${prefix}link_3"/>
+      <child link="${prefix}link_4"/>
+      <origin xyz="0.340 0 0.040" rpy="0 0 0" />
+      <axis xyz="-1 0 0" />
+      <limit lower="${radians(-190)}" upper="${radians(190)}" effort="55.86" velocity="${radians(550)}"/>
+      <dynamics damping="0.5" friction="0.2"/>
+    </joint>
+    <joint name="${prefix}joint_5" type="revolute">
+      <parent link="${prefix}link_4"/>
+      <child link="${prefix}link_5"/>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <axis xyz="0 -1 0" />
+      <limit lower="${radians(-135)}" upper="${radians(135)}" effort="32.68" velocity="${radians(550)}"/>
+      <dynamics damping="0.5" friction="0.2"/>
+    </joint>
+    <joint name="${prefix}joint_6" type="revolute">
+      <parent link="${prefix}link_5"/>
+      <child link="${prefix}link_6"/>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <axis xyz="-1 0 0" />
+      <limit lower="${radians(-360)}" upper="${radians(360)}" effort="22.54" velocity="${radians(1000)}"/>
+      <dynamics damping="0.5" friction="0.2"/>
+    </joint>
+    <!-- end of joint list -->
+
+    <!-- ROS base_link to Robot Manufacturer World Coordinates transform -->
+    <link name="${prefix}base" />
+    <joint name="${prefix}base_link-base" type="fixed">
+      <origin xyz="0 0 0.330" rpy="0 0 0"/>
+      <parent link="${prefix}base_link"/>
+      <child link="${prefix}base"/>
+    </joint>
+
+    <!-- ROS-Industrial 'flange' frame, attachment point for EEF models -->
+    <link name="${prefix}flange"/>
+    <joint name="${prefix}joint_6-flange" type="fixed">
+      <origin xyz="0.080 0 0" rpy="0 0 0"/>
+      <parent link="${prefix}link_6"/>
+      <child link="${prefix}flange"/>
+    </joint>
+
+    <!-- ROS-Industrial 'tool0' frame, all-zeros tool frame -->
+    <link name="${prefix}tool0"/>
+    <joint name="${prefix}flange-tool0" type="fixed">
+      <origin xyz="0 0 0" rpy="${radians(180)} ${radians(-90)} 0"/>
+      <parent link="${prefix}flange"/>
+      <child link="${prefix}tool0"/>
+    </joint>
+
+  </xacro:macro>
+</robot>

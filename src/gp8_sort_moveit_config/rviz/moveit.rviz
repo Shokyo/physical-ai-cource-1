@@ -1,0 +1,71 @@
+Panels:
+  - Class: rviz_common/Displays
+    Name: Displays
+Visualization Manager:
+  Class: ""
+  Displays:
+    - Class: rviz_default_plugins/Grid
+      Enabled: true
+      Name: Grid
+      Cell Size: 0.25
+      Plane Cell Count: 8
+    - Class: moveit_rviz_plugin/PlanningScene
+      Enabled: true
+      Name: PlanningScene
+      Move Group Namespace: ""
+      Planning Scene Topic: /monitored_planning_scene
+      Robot Description: robot_description
+      Scene Geometry:
+        Scene Alpha: 0.6
+        Show Scene Geometry: true
+      Scene Robot:
+        Robot Alpha: 1
+        Show Robot Collision: false
+        Show Robot Visual: true
+    - Class: moveit_rviz_plugin/Trajectory
+      Enabled: true
+      Name: Trajectory
+      Robot Description: robot_description
+      Trajectory Topic: /display_planned_path
+      Loop Animation: false
+      Show Trail: true
+      Trail Step Size: 2
+      Robot Alpha: 0.4
+      State Display Time: 0.05 s
+    - Class: rviz_default_plugins/TF
+      Enabled: true
+      Name: TF
+      Show Names: false
+      Show Axes: true
+      Show Arrows: false
+      Marker Scale: 0.4
+      Frames:
+        All Enabled: false
+        tcp:
+          Value: true
+        world:
+          Value: true
+  Global Options:
+    Fixed Frame: world
+    Frame Rate: 30
+    Background Color: 48; 48; 56
+  Tools:
+    - Class: rviz_default_plugins/MoveCamera
+    - Class: rviz_default_plugins/Interact
+  Views:
+    Current:
+      Class: rviz_default_plugins/Orbit
+      Distance: 1.9
+      Focal Point:
+        X: 0.35
+        Y: 0.0
+        Z: 0.2
+      Pitch: 0.45
+      Yaw: 5.5
+Window Geometry:
+  Displays:
+    collapsed: true
+  Height: 600
+  Width: 730
+  Hide Left Dock: true
+  Hide Right Dock: true
